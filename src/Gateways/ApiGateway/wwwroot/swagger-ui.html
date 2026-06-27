@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>API Gateway Swagger UI</title>
+    <link rel="stylesheet" href="swagger-ui.css" />
+    <style>
+      body.dark {
+        background: #0b1018;
+        color: #ddd;
+      }
+      body.dark .swagger-ui {
+        background: #0b1018;
+        color: #ddd;
+      }
+      body.dark .topbar,
+      body.dark .topbar-wrapper,
+      body.dark .scheme-container,
+      body.dark .opblock,
+      body.dark .information-container,
+      body.dark .response-col_description,
+      body.dark .parameter__type,
+      body.dark .parameter__name {
+        background: #11161f !important;
+        color: #ddd !important;
+        border-color: #2c3848 !important;
+      }
+      body.dark .topbar {
+        border-bottom-color: #333;
+      }
+      body.dark .opblock-summary {
+        background: #131a26 !important;
+        border-color: #2c3848 !important;
+      }
+      body.dark .opblock-summary-method {
+        color: #fff !important;
+      }
+      body.dark .opblock-summary-path {
+        color: #85b8ff !important;
+      }
+      body.dark .btn,
+      body.dark .btn.execute,
+      body.dark .btn.try-out,
+      body.dark .btn.authorize {
+        background: #2f6ad5 !important;
+        color: #fff !important;
+        border-color: #3d7be6 !important;
+      }
+      body.dark .btn.cancel {
+        background: #5b5f66 !important;
+      }
+      body.dark select,
+      body.dark input,
+      body.dark textarea,
+      body.dark .opblock-body input,
+      body.dark .opblock-body textarea,
+      body.dark .opblock-body select {
+        background: #121827 !important;
+        color: #eee !important;
+        border-color: #2c3848 !important;
+      }
+      body.dark pre,
+      body.dark code,
+      body.dark .response-col_description pre,
+      body.dark .code-snippet,
+      body.dark .microlinks,
+      body.dark .opblock-tabs,
+      body.dark .model-box,
+      body.dark .opblock-body {
+        background: #10151d !important;
+        color: #e5e5e5 !important;
+      }
+      body.dark .opblock-description,
+      body.dark .opblock-summary-description,
+      body.dark .opblock-section-header,
+      body.dark .parameter__description,
+      body.dark .parameter__name,
+      body.dark .parameter__type,
+      body.dark .opblock-section {
+        background: #11161f !important;
+        color: #ddd !important;
+        border-color: #2c3848 !important;
+      }
+      body.dark .opblock-summary-path,
+      body.dark .opblock-summary-method,
+      body.dark .info h1,
+      body.dark .info span,
+      body.dark .info p,
+      body.dark .auth-wrapper,
+      body.dark .scheme-container,
+      body.dark .scheme-container input,
+      body.dark .scheme-container select,
+      body.dark .scheme-container button {
+        color: #eee !important;
+      }
+      body.dark .topbar,
+      body.dark .topbar-wrapper,
+      body.dark .scheme-container,
+      body.dark .opblock,
+      body.dark .information-container,
+      body.dark .response-col_description,
+      body.dark .parameter__type,
+      body.dark .parameter__name {
+        background: #11161f !important;
+        color: #ddd !important;
+        border-color: #2c3848 !important;
+      }
+      body.dark .topbar {
+        border-bottom-color: #333;
+      }
+      body.dark .info {
+        background: transparent !important;
+      }
+      body.dark .responses-table,
+      body.dark .response-col_status,
+      body.dark .response-col_description,
+      body.dark .response-col_links {
+        background: #11161f !important;
+      }
+      body.dark .tab,
+      body.dark .tab.active {
+        background: #131a26 !important;
+        color: #fff !important;
+      }
+      body.dark .property,
+      .body.dark .model-container,
+      body.dark .renderedMarkdown,
+      body.dark .model-json {
+        background: #10151d !important;
+        color: #ddd !important;
+      }
+      #themeToggle {
+        position: fixed;
+        right: 16px;
+        top: 16px;
+        z-index: 9999;
+        border: none;
+        padding: 10px 14px;
+        background: #111827;
+        color: #f8fafc;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      }
+    </style>
+  </head>
+  <body>
+    <button id="themeToggle">Dark mode</button>
+    <div id="swagger-ui"></div>
+    <script src="swagger-ui-bundle.js"></script>
+    <script src="swagger-ui-standalone-preset.js"></script>
+    <script>
+      const setTheme = (isDark) => {
+        document.body.classList.toggle("dark", isDark);
+        const toggle = document.getElementById("themeToggle");
+        if (toggle) {
+          toggle.textContent = isDark ? "Light mode" : "Dark mode";
+        }
+        localStorage.setItem("swaggerTheme", isDark ? "dark" : "light");
+      };
+
+      window.onload = function () {
+        const savedTheme = localStorage.getItem("swaggerTheme");
+        const defaultDark = window.matchMedia(
+          "(prefers-color-scheme: dark)",
+        ).matches;
+        setTheme(savedTheme === "dark" || (savedTheme === null && defaultDark));
+
+        SwaggerUIBundle({
+          url: "swagger.json",
+          dom_id: "#swagger-ui",
+          deepLinking: true,
+          presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+          layout: "BaseLayout",
+        });
+
+        const toggle = document.getElementById("themeToggle");
+        toggle.addEventListener("click", function () {
+          setTheme(!document.body.classList.contains("dark"));
+        });
+      };
+    </script>
+  </body>
+</html>

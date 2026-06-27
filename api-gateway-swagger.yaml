@@ -1,0 +1,268 @@
+openapi: 3.0.3
+info:
+  title: Clean Architecture Microservices - API Gateway
+  description: API Gateway documentation for IdentityService and ProductService.
+  version: 1.0.0
+servers:
+  - url: https://localhost:5001
+    description: Local API Gateway (HTTPS)
+  - url: http://localhost:5000
+    description: Local API Gateway (HTTP)
+paths:
+  /api/auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterCommand"
+      responses:
+        "200":
+          description: Registration succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResult"
+        "400":
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResult"
+  /api/auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Authenticate a user and return a JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginQuery"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResult"
+        "400":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResult"
+  /api/products:
+    get:
+      tags:
+        - Products
+      summary: Get all products
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductDto"
+    post:
+      tags:
+        - Products
+      summary: Create a new product
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductCommand"
+      responses:
+        "201":
+          description: Product created
+          content:
+            application/json:
+              schema:
+                type: integer
+        "400":
+          description: Validation failed
+        "401":
+          description: Unauthorized
+  /api/products/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags:
+        - Products
+      summary: Get product by ID
+      responses:
+        "200":
+          description: Product found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductDto"
+        "404":
+          description: Product not found
+    put:
+      tags:
+        - Products
+      summary: Update an existing product
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProductCommand"
+      responses:
+        "204":
+          description: Product updated
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Product not found
+    delete:
+      tags:
+        - Products
+      summary: Delete a product
+      security:
+        - BearerAuth: []
+      responses:
+        "204":
+          description: Product deleted
+        "401":
+          description: Unauthorized
+        "404":
+          description: Product not found
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    RegisterCommand:
+      type: object
+      properties:
+        userName:
+          type: string
+          example: nguyen123
+        email:
+          type: string
+          format: email
+          example: a@example.com
+        password:
+          type: string
+          format: password
+          example: Secret123
+      required:
+        - userName
+        - email
+        - password
+    LoginQuery:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: a@example.com
+        password:
+          type: string
+          format: password
+          example: Secret123
+      required:
+        - email
+        - password
+    AuthResult:
+      type: object
+      properties:
+        succeeded:
+          type: boolean
+          example: true
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        errors:
+          type: array
+          items:
+            type: string
+          example: []
+    ProductDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Example Product"
+        description:
+          type: string
+          example: "Product description"
+        price:
+          type: number
+          format: decimal
+          example: 99.99
+        stock:
+          type: integer
+          example: 10
+    CreateProductCommand:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "New Product"
+        description:
+          type: string
+          example: "New product description"
+        price:
+          type: number
+          format: decimal
+          example: 50.0
+        stock:
+          type: integer
+          example: 5
+      required:
+        - name
+        - description
+        - price
+        - stock
+    UpdateProductCommand:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Updated Product"
+        description:
+          type: string
+          example: "Updated description"
+        price:
+          type: number
+          format: decimal
+          example: 75.0
+        stock:
+          type: integer
+          example: 20
+      required:
+        - id
+        - name
+        - description
+        - price
+        - stock
