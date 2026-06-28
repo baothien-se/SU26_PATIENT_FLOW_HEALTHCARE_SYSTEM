@@ -1,7 +1,9 @@
 namespace Shared.Events;
 
 /// <summary>
-/// Base class for integration events (cross-service events)
+/// Base class for integration events (cross-service communication via RabbitMQ).
+/// Integration events are published by one microservice and consumed by others.
+/// They are different from domain events which are internal to a single service.
 /// </summary>
 public abstract class IntegrationEvent
 {
@@ -16,7 +18,7 @@ public abstract class IntegrationEvent
     public DateTime OccurredAt { get; } = DateTime.UtcNow;
 
     /// <summary>
-    /// Gets the correlation ID for tracking related events
+    /// Gets the correlation ID for tracking related events across services
     /// </summary>
     public Guid CorrelationId { get; set; } = Guid.NewGuid();
 
@@ -31,7 +33,7 @@ public abstract class IntegrationEvent
     public Dictionary<string, object>? Metadata { get; set; }
 
     /// <summary>
-    /// Gets the event version for versioning support
+    /// Gets the event version for schema evolution support
     /// </summary>
     public int Version { get; set; } = 1;
 }

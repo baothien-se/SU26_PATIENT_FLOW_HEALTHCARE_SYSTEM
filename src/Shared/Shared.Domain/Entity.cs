@@ -1,14 +1,15 @@
 namespace Shared.Domain;
 
 /// <summary>
-/// Base entity class for all domain entities
+/// Base entity class for all domain entities.
+/// Uses Guid as the identifier type for microservice-safe unique IDs.
 /// </summary>
-public abstract class Entity
+public abstract class Entity : IEquatable<Entity>
 {
     /// <summary>
-    /// Gets the entity's unique identifier
+    /// Gets the entity's unique identifier (Guid for cross-service uniqueness)
     /// </summary>
-    public int Id { get; protected set; }
+    public Guid Id { get; protected set; }
 
     /// <summary>
     /// Gets the creation timestamp (UTC)
@@ -21,14 +22,14 @@ public abstract class Entity
     public DateTime? UpdatedAt { get; protected set; }
 
     /// <summary>
-    /// Gets the user ID who created this entity
+    /// Gets the user ID who created this entity (string for ASP.NET Identity compatibility)
     /// </summary>
-    public int? CreatedBy { get; protected set; }
+    public string? CreatedBy { get; protected set; }
 
     /// <summary>
     /// Gets the user ID who last updated this entity
     /// </summary>
-    public int? UpdatedBy { get; protected set; }
+    public string? UpdatedBy { get; protected set; }
 
     /// <summary>
     /// Gets a value indicating whether this entity is marked as deleted (soft delete)
@@ -39,6 +40,19 @@ public abstract class Entity
     /// Gets the timestamp when this entity was soft deleted
     /// </summary>
     public DateTime? DeletedAt { get; protected set; }
+
+    /// <summary>
+    /// Protected parameterless constructor for EF Core
+    /// </summary>
+    protected Entity() { }
+
+    /// <summary>
+    /// Protected constructor with ID for factory methods
+    /// </summary>
+    protected Entity(Guid id)
+    {
+        Id = id;
+    }
 
     /// <summary>
     /// Soft delete the entity
@@ -59,6 +73,24 @@ public abstract class Entity
     }
 
     /// <summary>
+    /// Set audit info for creation
+    /// </summary>
+    public void SetCreatedAudit(string? userId)
+    {
+        CreatedAt = DateTime.UtcNow;
+        CreatedBy = userId;
+    }
+
+    /// <summary>
+    /// Set audit info for update
+    /// </summary>
+    public void SetUpdatedAudit(string? userId)
+    {
+        UpdatedAt = DateTime.UtcNow;
+        UpdatedBy = userId;
+    }
+
+    /// <summary>
     /// Update the last modified timestamp
     /// </summary>
     protected virtual void UpdateTimestamp()
@@ -66,18 +98,18 @@ public abstract class Entity
         UpdatedAt = DateTime.UtcNow;
     }
 
+    public bool Equals(Entity? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        if (GetType() != other.GetType()) return false;
+        if (Id == Guid.Empty || other.Id == Guid.Empty) return false;
+        return Id == other.Id;
+    }
+
     public override bool Equals(object? obj)
     {
-        if (obj is not Entity entity)
-            return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
-
-        if (GetType() != obj.GetType())
-            return false;
-
-        return Id == entity.Id;
+        return Equals(obj as Entity);
     }
 
     public override int GetHashCode()
@@ -87,10 +119,9 @@ public abstract class Entity
 
     public static bool operator ==(Entity? left, Entity? right)
     {
-        if (Equals(left, null) ^ Equals(right, null))
-            return false;
-
-        return Equals(left, right);
+        if (left is null && right is null) return true;
+        if (left is null || right is null) return false;
+        return left.Equals(right);
     }
 
     public static bool operator !=(Entity? left, Entity? right)
